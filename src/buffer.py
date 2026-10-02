@@ -4,6 +4,10 @@ import subprocess
 import msvcrt
 import requests
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # ============================================================
 # CONFIGURAÇÃO
 # ============================================================
@@ -30,10 +34,10 @@ TRAILING_SECONDS = 6
 
 CHECK_INTERVAL = 0.05
 
-FFMPEG = r"C:\ffmpeg\bin\ffmpeg.exe"
-FFPROBE = r"C:\ffmpeg\bin\ffprobe.exe"
+FFMPEG = os.getenv("FFMPEG_PATH")
+FFPROBE = os.getenv("FFPROBE_PATH")
 
-UPLOAD_URL = "http://localhost:8080/api/replays"
+UPLOAD_URL = os.getenv("UPLOAD_URL")
 
 from concurrent.futures import ThreadPoolExecutor
 
