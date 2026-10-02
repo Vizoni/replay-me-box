@@ -1,0 +1,17 @@
+# Runtime
+buffer/
+replays/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Environment / secrets
+.env
+
+# Local files
+*.log
+
+# IDE
+.vscode/
+.idea/
