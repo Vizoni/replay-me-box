@@ -12,25 +12,13 @@ load_dotenv()
 # CONFIGURAÇÃO
 # ============================================================
 
-BUFFER_DIR = "buffer"
-REPLAY_DIR = "replays"
+BUFFER_DIR = os.getenv("BUFFER_DIR")
+REPLAY_DIR = os.getenv("REPLAY_DIR")
 
-# Aproximadamente 2 segundos por segmento.
-# 60 segmentos = ~120 segundos de gordura.
-BUFFER_SEGMENTS = 60
-
-# Duração desejada do replay
-REPLAY_SECONDS = 10
-
-# Esperamos o stream avançar depois do botão
-WAIT_AFTER_BUTTON = 5
-
-# Depois da espera, ignoramos os segmentos mais recentes.
-#
-# Isso é proposital:
-# queremos que o vídeo termine próximo do botão,
-# e não vários segundos depois dele.
-TRAILING_SECONDS = 6
+BUFFER_SEGMENTS = int(os.getenv("BUFFER_SEGMENTS"))
+REPLAY_SECONDS = float(os.getenv("REPLAY_SECONDS"))
+WAIT_AFTER_BUTTON = float(os.getenv("WAIT_AFTER_BUTTON"))
+TRAILING_SECONDS = float(os.getenv("TRAILING_SECONDS"))
 
 CHECK_INTERVAL = 0.05
 
@@ -564,7 +552,6 @@ def create_replay():
 
 def main():
 
-    os.makedirs(BUFFER_DIR, exist_ok=True)
     os.makedirs(REPLAY_DIR, exist_ok=True)
 
     print("=" * 60)
