@@ -11,6 +11,8 @@ __pycache__/
 
 # Local files
 *.log
+concat.txt
+logs/
 
 # IDE
 .vscode/

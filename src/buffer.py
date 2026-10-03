@@ -6,6 +6,8 @@ import requests
 
 from dotenv import load_dotenv
 
+from logger import log
+
 load_dotenv()
 
 # ============================================================
@@ -134,6 +136,8 @@ def clear_buffer_on_start():
 
     print(f"[BUFFER] Limpando {len(files)} segmentos antigos...")
 
+    log("BUFFER", f"Limpando {len(files)} segmentos antigos")
+
     for filepath in files:
         try:
             os.remove(filepath)
@@ -155,6 +159,12 @@ def upload_replay(replay_file):
     print("=" * 60)
     print("ENVIANDO REPLAY")
     print("=" * 60)
+
+    log(
+        "UPLOAD",
+        f"Iniciando upload: "
+        f"{os.path.basename(replay_file)}"
+    )
 
     if not os.path.exists(replay_file):
 
@@ -200,6 +210,11 @@ def upload_replay(replay_file):
                 timeout=120
             )
 
+            log(
+                "UPLOAD",
+                f"Servidor retornou HTTP {response.status_code}"
+            )
+
 
         elapsed = time.time() - start_time
 
@@ -223,11 +238,27 @@ def upload_replay(replay_file):
 
             print(response.text)
 
+            log(
+                "ERRO",
+                f"Upload falhou com HTTP {response.status_code}"
+            )
+
             return None
+
+        log(
+            "UPLOAD",
+            f"Upload concluído: "
+            f"{os.path.basename(replay_file)}"
+        )
 
         try:
             os.remove(replay_file)
             print(f"[UPLOAD] Arquivo local removido: {replay_file}")
+            log(
+                "UPLOAD",
+                f"Arquivo local removido: "
+                f"{os.path.basename(replay_file)}"
+            )
         except Exception as e:
             print(f"[UPLOAD] Não foi possível remover arquivo local: {e}")
 
@@ -266,6 +297,10 @@ def upload_replay(replay_file):
             "[UPLOAD] [ERRO] "
             "Não foi possível conectar ao Spring Boot."
         )
+        log(
+            "ERRO",
+            "Não foi possível conectar ao Spring Boot"
+        )
 
         print(
             f"[UPLOAD] Endpoint: {UPLOAD_URL}"
@@ -280,6 +315,10 @@ def upload_replay(replay_file):
             "[UPLOAD] [ERRO] "
             "Upload demorou mais que 120 segundos."
         )
+        log(
+            "ERRO",
+            "Upload excedeu o timeout de 120 segundos"
+        )
 
         return None
 
@@ -292,6 +331,11 @@ def upload_replay(replay_file):
         )
 
         print(e)
+
+        log(
+            "ERRO",
+            f"Erro inesperado no upload: {e}"
+        )
 
         return None
 
@@ -321,6 +365,7 @@ def create_replay():
     if not ready_segments:
 
         print("[ERRO] Nenhum segmento pronto.")
+        log("ERRO", "Nenhum segmento pronto para criar replay")
 
         return
 
@@ -341,23 +386,7 @@ def create_replay():
         f"trailing={TRAILING_SECONDS}s"
     )
 
-    # --------------------------------------------------------
     # Primeiro vamos ignorar os segmentos mais recentes.
-    #
-    # Exemplo:
-    #
-    # segmentos:
-    #
-    # 100 101 102 103 104 105 106
-    #                         ↑
-    #                     mais novo
-    #
-    # Se queremos ignorar ~2s:
-    #
-    # 100 101 102 103 104 105
-    #                      ↑
-    #                   termina aqui
-    # --------------------------------------------------------
 
     ignored_duration = 0
 
@@ -406,10 +435,12 @@ def create_replay():
 
         return
 
-    # --------------------------------------------------------
-    # Mostrar segmentos
-    # --------------------------------------------------------
-
+    log(
+        "REPLAY",
+        f"Selecionados {len(selected)} segmentos "
+        f"para replay de aproximadamente "
+        f"{total_duration:.2f}s"
+    )
     print()
     print("Segmentos selecionados:")
 
@@ -499,6 +530,12 @@ def create_replay():
         print("[FFMPEG] ERRO ao gerar replay:")
         print(result.stderr)
 
+        log(
+            "ERRO",
+            f"FFmpeg falhou ao gerar replay. "
+            f"Return code: {result.returncode}"
+        )
+
         return
 
     # --------------------------------------------------------
@@ -511,6 +548,10 @@ def create_replay():
             "[ERRO] FFmpeg terminou sem erro, "
             "mas replay.mp4 não foi encontrado."
         )
+        log(
+            "ERRO",
+            "FFmpeg terminou sem erro, mas replay.mp4 não foi encontrado."
+        )
 
         return
 
@@ -519,6 +560,13 @@ def create_replay():
     print()
     print(
         f"[FFMPEG] Replay gerado com sucesso."
+    )
+
+    log(
+        "REPLAY",
+        f"Replay gerado com sucesso: "
+        f"{os.path.basename(replay_file)} "
+        f"({replay_size / 1024 / 1024:.2f} MB)"
     )
 
     print(
@@ -588,6 +636,16 @@ def main():
 
     clear_buffer_on_start()
 
+    log("BUFFER", "Buffer iniciado")
+
+    log("CONFIG", f"Buffer configurado com {BUFFER_SEGMENTS} segmentos")
+
+    log("CONFIG", f"Replay configurado para {REPLAY_SECONDS}s")
+
+    log("CONFIG", f"Espera após botão: {WAIT_AFTER_BUTTON}s")
+
+    log("CONFIG", f"Margem final: {TRAILING_SECONDS}s")
+
     while True:
 
         try:
@@ -630,6 +688,8 @@ def main():
                         "[BOTÃO] Numpad 8 pressionado!"
                     )
 
+                    log("BOTAO", "Numpad 8 pressionado")
+
                     print(
                         f"[BOTÃO] "
                         f"Aguardando "
@@ -644,6 +704,8 @@ def main():
                         "[BOTÃO] "
                         "Montando replay..."
                     )
+
+                    log("REPLAY", "Iniciando criação do replay após espera do botão")
 
                     create_replay()
 
@@ -663,6 +725,12 @@ def main():
             print()
             print("[ERRO NO LOOP]")
             print(e)
+
+            log(
+                "ERRO",
+                f"Não foi possível apagar segmento "
+                f"{os.path.basename(filepath)}: {e}"
+            )
 
             time.sleep(1)
 
