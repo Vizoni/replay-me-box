@@ -4,7 +4,7 @@ import subprocess
 
 from dotenv import load_dotenv
 
-from logger import log
+from logger import log, cleanup_old_logs
 
 ## Esse arquivo é responsável por capturar o stream RTSP e salvar os segmentos de vídeo no buffer.
 
@@ -16,6 +16,8 @@ RTSP_URL = os.getenv("RTSP_URL")
 
 
 os.makedirs(BUFFER_DIR, exist_ok=True)
+
+cleanup_old_logs()
 
 log("CAPTURE", "Iniciando captura RTSP")
 
